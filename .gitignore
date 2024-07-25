@@ -12,3 +12,5 @@
 .env 
 
 id_ed25519
+
+.DS_Store
