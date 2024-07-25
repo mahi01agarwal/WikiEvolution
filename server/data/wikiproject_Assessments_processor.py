@@ -24,8 +24,8 @@ def download_csv(url, local_file_name):
 # Function to perform the data transformations
 def transform_data(df_revisions, df_pages):
     df_merged = df_revisions.merge(df_pages, on='page_id')
-    sorted_df = df_merged.groupby('page_title').apply(lambda x: x.sort_values('revision_id')).reset_index(drop=True)
-    latest_revisions_df = sorted_df.loc[sorted_df.groupby('page_title')['revision_timestamp'].idxmax()].reset_index(drop=True)
+    sorted_df = df_merged.sort_values(by=['page_title', 'revision_timestamp'], ascending=[True, False])
+    latest_revisions_df = sorted_df.groupby('page_title').first().reset_index()
     return latest_revisions_df
 
 # Function to save the transformed data to a CSV file
