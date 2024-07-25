@@ -1,0 +1,80 @@
+import React, { useEffect, useState } from 'react';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import FilterTable from './components/FilterData/FilterTable';
+import QualityImportanceStackedBarChart from './components/SimpleBarCharts/QualityImportanceStackedBarChart';
+import ImportanceQualityStackedBarChart from './components/SimpleBarCharts/ImportanceQualityStackedBarChart';
+import Graph from './components/AverageOfFeatures/Graph';
+import Dropdown from './components/AverageOfFeatures/Dropdown';
+import WikiProjectDropdown from './components/WikiProjectDropdown';
+import './App.css';
+import axios from 'axios';
+import FeatureCorrelationHeatmap from './components/FeatureCorrelationHeatmap';
+
+const App = () => {
+  const [selectedProject, setSelectedProject] = useState('');
+  const [data, setData] = useState([]);
+  const [selectedMetric, setSelectedMetric] = useState('pred_qual');
+
+  useEffect(() => {
+    axios.get('http://127.0.0.1:5000/get_csv_data_monthly_aggregated')
+      .then(response => {
+        console.log('Fetched data:', response.data);
+        setData(response.data);
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }, []);
+
+  const handleProjectSelect = (project) => {
+    setSelectedProject(project);
+    // Fetch and process data for the selected project
+  };
+
+  const handleMetricChange = (selectedOption) => {
+    setSelectedMetric(selectedOption.value);
+  };
+
+  return (
+    <div className="main-container">
+      <div className="fixed-header">
+        <Header />
+      </div>
+      <section style={{ paddingTop: '100px' }}>
+        <div style={{ paddingBottom: '20px', textAlign: 'center' }}>
+          <WikiProjectDropdown onSelectProject={handleProjectSelect} />
+        </div>
+        <h1 className="title-text">
+          <a
+            href="https://en.wikipedia.org/w/index.php?title=Wikipedia:WikiProject_Caribbean&oldid=1222553608"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="title-link"
+          >
+            Wikipedia:WikiProject Caribbean
+          </a>
+        </h1>
+        <div className="margin-top-3">
+          <FeatureCorrelationHeatmap />
+        </div>
+        <div className="margin-top-3">
+          <QualityImportanceStackedBarChart />
+        </div>
+        <div className="margin-top-3">
+          <ImportanceQualityStackedBarChart />
+        </div>
+        <div style={{ width: '100%' }}>
+          <Dropdown selectedMetric={selectedMetric} handleMetricChange={handleMetricChange} />
+        </div>
+        <div className="margin-top-3">
+          <Graph data={data} selectedMetric={selectedMetric} />
+        </div>
+        <div className="margin-top-3">
+          <FilterTable />
+        </div>
+      </section>
+      <Footer />
+    </div>
+  );
+};
+
+export default App;
