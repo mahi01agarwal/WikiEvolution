@@ -8,7 +8,8 @@ const Dropdown = ({ selectedMetric, handleMetricChange }) => {
         { value: 'num_media', label: 'Number of Media' },
         { value: 'num_categories', label: 'Number of Categories' },
         { value: 'num_wikilinks', label: 'Number of Wikilinks' },
-        { value: 'num_headings', label: 'Number of Headings' }
+        { value: 'num_headings', label: 'Number of Headings' },
+        { value: 'page_length', label: 'Page Length' } 
     ];
 
     return (

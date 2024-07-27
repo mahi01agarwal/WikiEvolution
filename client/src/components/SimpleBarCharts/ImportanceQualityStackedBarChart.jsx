@@ -71,7 +71,13 @@ const QualityStackedBarChart = () => {
                     }),
                     name: importance,
                     type: 'bar',
-                    marker: { color: color_map_importance[importance] },
+                    marker: { 
+                        color: color_map_importance[importance],
+                        line: {
+                            color: 'black',
+                            width: 1
+                        }
+                    },
                     hoverinfo: 'x+name+text',
                     text: quality_order.map(quality => {
                         const item = stackedData.find(d => d.Quality === quality && d.Importance === importance);
