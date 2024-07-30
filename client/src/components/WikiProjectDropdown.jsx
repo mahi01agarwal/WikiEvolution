@@ -15,10 +15,24 @@ const WikiProjectDropdown = ({ onSelectProject }) => {
       });
   }, []);
 
+  const handleProjectSelect = (option) => {
+    axios.post('http://127.0.0.1:5000/process_wikiproject', { project_name: option.value })
+      .then(response => {
+        console.log('WikiProject processed successfully:', response.data);
+      })
+      .catch(error => {
+        console.error('Error processing WikiProject:', error);
+      });
+  };
+
+
   return (
     <Select
       options={wikiprojects}
-      onChange={(option) => onSelectProject(option.value)}
+      onChange={(option) => {
+        onSelectProject(option.value);
+        handleProjectSelect(option);
+      }}
       placeholder="Select a WikiProject"
       noOptionsMessage={() => 'No WikiProjects found'}
       styles={{
