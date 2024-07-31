@@ -1,46 +1,81 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
-import RadarChart from './RadarChart';
-import Select from 'react-select';
 import moment from 'moment';
 
 const SelectedArticles = ({ selectedRows }) => {
     const [articleData, setArticleData] = useState([]);
     const [pageViewsData, setPageViewsData] = useState([]);
-    const [selectedArticle, setSelectedArticle] = useState('');
 
     useEffect(() => {
-        // Reset the selected article when selectedRows change
-        setSelectedArticle('');
-        setArticleData([]);
-        setPageViewsData([]);
+        // Fetch data for all selected articles when selectedRows change
+        if (Array.isArray(selectedRows) && selectedRows.length > 0) {
+            fetchAllArticlesData(selectedRows);
+        } else {
+            setArticleData([]);
+            setPageViewsData([]);
+        }
     }, [selectedRows]);
 
-    const fetchArticleData = (pageId) => {
-        axios.get(`http://127.0.0.1:5000/get_article_data?page_id=${pageId}`)
-            .then(response => {
-                setArticleData(response.data);
+    const fetchAllArticlesData = (articles) => {
+        const articlePromises = articles.map(article => 
+            axios.get(`http://127.0.0.1:5000/get_article_data?page_id=${article.page_id}`)
+        );
+
+        Promise.all(articlePromises)
+            .then(responses => {
+                const allArticleData = responses.map(response => response.data);
+                const aggregatedArticleData = aggregateArticleData(allArticleData);
+                setArticleData(aggregatedArticleData);
+
+                // Fetch page views data for the aggregated article data
+                const titles = articles.map(article => article.page_title);
+                const start = aggregatedArticleData[0]?.year_month.replace('-', '') + '01';
+                const end = aggregatedArticleData[aggregatedArticleData.length - 1]?.year_month.replace('-', '') + '01';
+                if (start && end) {
+                    fetchPageViewsData(titles, start, end);
+                }
             })
             .catch(error => {
                 console.error('Error fetching article data:', error);
             });
     };
 
-    const fetchPageViewsData = (title, start, end) => {
-        axios.get(`http://127.0.0.1:5000/get_pageviews?title=${title}&start=${start}&end=${end}`)
-            .then(response => {
-                const dailyData = response.data.items;
-                const monthlyData = aggregateMonthlyData(dailyData);
-                setPageViewsData(monthlyData);
+    const fetchPageViewsData = (titles, start, end) => {
+        const pageViewsPromises = titles.map(title => 
+            axios.get(`http://127.0.0.1:5000/get_pageviews?title=${title}&start=${start}&end=${end}`)
+        );
+
+        Promise.all(pageViewsPromises)
+            .then(responses => {
+                const allPageViewsData = responses.flatMap(response => response.data.items);
+                const aggregatedPageViewsData = aggregatePageViewsData(allPageViewsData);
+                setPageViewsData(aggregatedPageViewsData);
             })
             .catch(error => {
                 console.error('Error fetching page views data:', error);
             });
     };
 
-    const aggregateMonthlyData = (dailyData) => {
-        const monthlyData = dailyData.reduce((acc, item) => {
+    const aggregateArticleData = (allArticleData) => {
+        const aggregatedData = {};
+        allArticleData.forEach(articleData => {
+            articleData.forEach(dataPoint => {
+                if (!aggregatedData[dataPoint.year_month]) {
+                    aggregatedData[dataPoint.year_month] = { year_month: dataPoint.year_month, pred_qual: 0, count: 0 };
+                }
+                aggregatedData[dataPoint.year_month].pred_qual += dataPoint.pred_qual;
+                aggregatedData[dataPoint.year_month].count += 1;
+            });
+        });
+        return Object.values(aggregatedData).map(data => ({
+            year_month: data.year_month,
+            pred_qual: data.pred_qual / data.count,
+        }));
+    };
+
+    const aggregatePageViewsData = (allPageViewsData) => {
+        const monthlyData = allPageViewsData.reduce((acc, item) => {
             const month = moment(item.timestamp, "YYYYMMDDHH").format("YYYY-MM");
             if (!acc[month]) {
                 acc[month] = 0;
@@ -80,36 +115,9 @@ const SelectedArticles = ({ selectedRows }) => {
         link.click();
     };
 
-    const handleArticleChange = (selectedOption) => {
-        setSelectedArticle(selectedOption.value);
-        const selectedArticle = selectedRows.find(article => article.page_title === selectedOption.value);
-        if (selectedArticle) {
-            fetchArticleData(selectedArticle.page_id);
-        }
-    };
-
-    useEffect(() => {
-        if (articleData.length > 0 && selectedArticle) {
-            const start = articleData[0]?.year_month.replace('-', '') + '01';
-            const end = articleData[articleData.length - 1]?.year_month.replace('-', '') + '01';
-            if (start && end) {
-                fetchPageViewsData(selectedArticle, start, end);
-            }
-        }
-    }, [articleData, selectedArticle]);
-
-    // Use a Set to eliminate duplicates and only include selected articles
-    const selectedArticlesSet = new Set(Array.isArray(selectedRows) ? selectedRows.map(article => article.page_title) : []);
-    const selectedArticles = Array.from(selectedArticlesSet).map(title => selectedRows.find(article => article.page_title === title));
-
-    const articleOptions = selectedArticles.map(article => ({
-        value: article.page_title,
-        label: article.page_title
-    }));
-
     return (
         <div className="selected-articles">
-            {selectedArticles.length > 0 && (
+            {selectedRows.length > 0 && (
                 <div>
                     <button onClick={downloadCSV} className="btn btn-primary">
                         Download CSV
@@ -117,29 +125,6 @@ const SelectedArticles = ({ selectedRows }) => {
                     <button onClick={downloadTitles} className="btn btn-secondary">
                         Download Titles
                     </button>
-                    <div className="article-selector">
-                        <Select
-                            options={articleOptions}
-                            onChange={handleArticleChange}
-                            value={articleOptions.find(option => option.value === selectedArticle)}
-                            placeholder="Select an article"
-                            styles={{
-                                container: (provided) => ({
-                                    ...provided,
-                                    marginBottom: '20px',
-                                    width: '300px',
-                                }),
-                                control: (provided) => ({
-                                    ...provided,
-                                    width: '300px',
-                                }),
-                                menu: (provided) => ({
-                                    ...provided,
-                                    width: '300px',
-                                }),
-                            }}
-                        />
-                    </div>
                     <div className="plot-container">
                         {articleData.length > 0 && (
                             <>
@@ -201,13 +186,12 @@ const SelectedArticles = ({ selectedRows }) => {
                                     useResizeHandler={true}
                                     style={{ width: "100%", height: "100%" }}
                                 />
-                                {/* <RadarChart articleData={articleData} /> */}
                             </>
                         )}
                     </div>
                 </div>
             )}
-            {selectedArticles.length === 0 && (
+            {selectedRows.length === 0 && (
                 <p>No articles selected.</p>
             )}
         </div>
