@@ -6,6 +6,7 @@ import moment from 'moment';
 const SelectedArticles = ({ selectedRows }) => {
     const [articleData, setArticleData] = useState([]);
     const [pageViewsData, setPageViewsData] = useState([]);
+    const [selectedMetric, setSelectedMetric] = useState('pred_qual');
 
     useEffect(() => {
         // Fetch data for all selected articles when selectedRows change
@@ -62,15 +63,28 @@ const SelectedArticles = ({ selectedRows }) => {
         allArticleData.forEach(articleData => {
             articleData.forEach(dataPoint => {
                 if (!aggregatedData[dataPoint.year_month]) {
-                    aggregatedData[dataPoint.year_month] = { year_month: dataPoint.year_month, pred_qual: 0, count: 0 };
+                    aggregatedData[dataPoint.year_month] = {
+                        year_month: dataPoint.year_month,
+                        pred_qual: 0,
+                        num_refs: 0,
+                        num_media: 0,
+                        num_wikilinks: 0,
+                        count: 0
+                    };
                 }
                 aggregatedData[dataPoint.year_month].pred_qual += dataPoint.pred_qual;
+                aggregatedData[dataPoint.year_month].num_refs += dataPoint.num_refs;
+                aggregatedData[dataPoint.year_month].num_media += dataPoint.num_media;
+                aggregatedData[dataPoint.year_month].num_wikilinks += dataPoint.num_wikilinks;
                 aggregatedData[dataPoint.year_month].count += 1;
             });
         });
         return Object.values(aggregatedData).map(data => ({
             year_month: data.year_month,
             pred_qual: data.pred_qual / data.count,
+            num_refs: data.num_refs / data.count,
+            num_media: data.num_media / data.count,
+            num_wikilinks: data.num_wikilinks / data.count,
         }));
     };
 
@@ -125,19 +139,28 @@ const SelectedArticles = ({ selectedRows }) => {
                     <button onClick={downloadTitles} className="btn btn-secondary">
                         Download Titles
                     </button>
+                    <div>
+                        <label>Select Metric: </label>
+                        <select value={selectedMetric} onChange={(e) => setSelectedMetric(e.target.value)}>
+                            <option value="pred_qual">Predicted Quality</option>
+                            <option value="num_refs">Number of References</option>
+                            <option value="num_media">Number of Media</option>
+                            <option value="num_wikilinks">Number of Wikilinks</option>
+                        </select>
+                    </div>
                     <div className="plot-container">
                         {articleData.length > 0 && (
                             <>
                                 <Plot
                                     data={[{
                                         x: articleData.map(d => d.year_month),
-                                        y: articleData.map(d => d.pred_qual),
+                                        y: articleData.map(d => d[selectedMetric]),
                                         type: 'scatter',
                                         mode: 'lines',
-                                        name: 'Predicted Quality'
+                                        name: selectedMetric.replace('_', ' ').toUpperCase()
                                     }]}
                                     layout={{
-                                        title: `Predicted Quality over Time`,
+                                        title: `${selectedMetric.replace('_', ' ').toUpperCase()} over Time`,
                                         xaxis: {
                                             rangeselector: {
                                                 buttons: [
@@ -150,7 +173,7 @@ const SelectedArticles = ({ selectedRows }) => {
                                             rangeslider: { visible: true },
                                             type: 'date'
                                         },
-                                        yaxis: { title: 'Predicted Quality' },
+                                        yaxis: { title: selectedMetric.replace('_', ' ').toUpperCase() },
                                         template: 'plotly_white'
                                     }}
                                     config={{ displayModeBar: false }}
