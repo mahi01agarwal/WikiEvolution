@@ -56,7 +56,6 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  
 }
 .main-container section {
   padding-left: var(--gutter-width);
@@ -442,15 +441,4 @@ a {
 
 .article-selector {
   margin-top: 20px;
-}
-
-
-
-.fixed-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background-color: white; /* or any other background color to match your design */
-  z-index: 1000; /* Ensure it stays above other content */
-  /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow for better visibility */
 }

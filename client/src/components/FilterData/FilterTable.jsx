@@ -181,7 +181,7 @@ const FilterTable = () => {
     return (
         <div className="main-container">
             <section>
-                <h1 className="section-text">Filter Data</h1>
+                <h1 className="sub-section-text">Filter Data</h1>
                 <form id="filter-form" className="form">
                     <div className="form-row">
                         <div className="form-group">

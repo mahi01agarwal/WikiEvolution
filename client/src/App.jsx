@@ -36,14 +36,12 @@ const App = () => {
 
   return (
     <div className="main-container">
-      <div className="fixed-header">
-        <Header />
-      </div>
-      <section style={{ paddingTop: '100px' }}>
-        <div style={{ paddingBottom: '20px', textAlign: 'center' }}>
+      <Header />
+      <section >
+        <div className='margin-top-3'>
           <WikiProjectDropdown onSelectProject={handleProjectSelect} />
         </div>
-        <h1 className="title-text">
+        <div className="section-text margin-top-3">
           <a
             href="https://en.wikipedia.org/w/index.php?title=Wikipedia:WikiProject_Caribbean&oldid=1222553608"
             target="_blank"
@@ -52,7 +50,7 @@ const App = () => {
           >
             Wikipedia:WikiProject Caribbean
           </a>
-        </h1>
+        </div>
         <div className="margin-top-3">
           <FeatureCorrelationHeatmap />
         </div>
