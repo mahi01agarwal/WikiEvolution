@@ -139,15 +139,15 @@ const SelectedArticles = ({ selectedRows }) => {
                     <button onClick={downloadTitles} className="btn btn-secondary">
                         Download Titles
                     </button>
-                    <div>
-                        <label>Select Metric: </label>
+                    {/* <div> */}
+                        {/* <label>Select Metric: </label> */}
                         <select value={selectedMetric} onChange={(e) => setSelectedMetric(e.target.value)}>
                             <option value="pred_qual">Predicted Quality</option>
                             <option value="num_refs">Number of References</option>
                             <option value="num_media">Number of Media</option>
                             <option value="num_wikilinks">Number of Wikilinks</option>
                         </select>
-                    </div>
+                    {/* </div> */}
                     <div className="plot-container">
                         {articleData.length > 0 && (
                             <>
