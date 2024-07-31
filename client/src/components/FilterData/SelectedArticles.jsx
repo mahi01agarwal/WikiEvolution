@@ -69,6 +69,9 @@ const SelectedArticles = ({ selectedRows }) => {
                         num_refs: 0,
                         num_media: 0,
                         num_wikilinks: 0,
+                        num_categories: 0,
+                        num_headings: 0,
+                        page_length: 0,
                         count: 0
                     };
                 }
@@ -76,6 +79,9 @@ const SelectedArticles = ({ selectedRows }) => {
                 aggregatedData[dataPoint.year_month].num_refs += dataPoint.num_refs;
                 aggregatedData[dataPoint.year_month].num_media += dataPoint.num_media;
                 aggregatedData[dataPoint.year_month].num_wikilinks += dataPoint.num_wikilinks;
+                aggregatedData[dataPoint.year_month].num_categories += dataPoint.num_categories;
+                aggregatedData[dataPoint.year_month].num_headings += dataPoint.num_headings;
+                aggregatedData[dataPoint.year_month].page_length += dataPoint.page_length;
                 aggregatedData[dataPoint.year_month].count += 1;
             });
         });
@@ -85,6 +91,9 @@ const SelectedArticles = ({ selectedRows }) => {
             num_refs: data.num_refs / data.count,
             num_media: data.num_media / data.count,
             num_wikilinks: data.num_wikilinks / data.count,
+            num_categories: data.num_categories / data.count,
+            num_headings: data.num_headings / data.count,
+            page_length: data.page_length / data.count,
         }));
     };
 
@@ -139,15 +148,15 @@ const SelectedArticles = ({ selectedRows }) => {
                     <button onClick={downloadTitles} className="btn btn-secondary">
                         Download Titles
                     </button>
-                    {/* <div> */}
-                        {/* <label>Select Metric: </label> */}
-                        <select value={selectedMetric} onChange={(e) => setSelectedMetric(e.target.value)}>
-                            <option value="pred_qual">Predicted Quality</option>
-                            <option value="num_refs">Number of References</option>
-                            <option value="num_media">Number of Media</option>
-                            <option value="num_wikilinks">Number of Wikilinks</option>
-                        </select>
-                    {/* </div> */}
+                    <select value={selectedMetric} onChange={(e) => setSelectedMetric(e.target.value)}>
+                        <option value="pred_qual">Predicted Quality</option>
+                        <option value="num_refs">Number of References</option>
+                        <option value="num_media">Number of Media</option>
+                        <option value="num_wikilinks">Number of Wikilinks</option>
+                        <option value="num_categories">Number of Categories</option>
+                        <option value="num_headings">Number of Headings</option>
+                        <option value="page_length">Page Length</option>
+                    </select>
                     <div className="plot-container">
                         {articleData.length > 0 && (
                             <>
