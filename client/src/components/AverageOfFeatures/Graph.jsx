@@ -11,7 +11,7 @@ const Graph = ({ data, selectedMetric }) => {
     // Extract the data for plotting
     const meanData = data.map(d => d[meanKey]);
     const sumData = data.map(d => d[sumKey]);
-    const xData = data.map(d => d.year_month);
+    const xData = data.map(d => d.month);
 
     // Debugging: Check if the data arrays are populated correctly
     console.log('Mean Data:', meanData);

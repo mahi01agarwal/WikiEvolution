@@ -136,30 +136,34 @@ def get_article_data():
     return jsonify(article_data.to_dict(orient='records'))
 
 
+
 @app.route('/get_csv_data_monthly_aggregated', methods=['GET'])
 def get_csv_data_monthly_aggregated():
     try:
         # Read the CSV file
-        df = pd.read_csv('Carribean_Monthly_Lastest_Revisions.csv')
+        df = pd.read_csv('caribbean.csv')
         
         # Convert 'year_month' column to datetime
-        df['year_month'] = pd.to_datetime(df['year_month'], format='%Y-%m')
+        df['month'] = pd.to_datetime(df['month'], format='%Y-%m')
+        
+        # Sort the dataframe by 'year_month'
+        df = df.sort_values(by='month')
         
         # Select only numeric columns for aggregation
         numeric_columns = df.select_dtypes(include='number').columns
         
-        # Calculate monthly mean
-        monthly_mean = df.groupby(df['year_month'].dt.to_period('M'))[numeric_columns].mean().reset_index()
+        # Calculate monthly unique mean
+        monthly_mean = df.groupby(df['month'].dt.to_period('M'))[numeric_columns].mean().reset_index()
         
-        # Calculate monthly sum
-        monthly_sum = df.groupby(df['year_month'].dt.to_period('M'))[numeric_columns].sum().reset_index()
+        # Calculate monthly unique sum
+        monthly_sum = df.groupby(df['month'].dt.to_period('M'))[numeric_columns].sum().reset_index()
         
         # Convert 'year_month' back to string for JSON serialization
-        monthly_mean['year_month'] = monthly_mean['year_month'].astype(str)
-        monthly_sum['year_month'] = monthly_sum['year_month'].astype(str)
+        monthly_mean['month'] = monthly_mean['month'].astype(str)
+        monthly_sum['month'] = monthly_sum['month'].astype(str)
         
         # Merge mean and sum dataframes
-        monthly_aggregated = monthly_mean.merge(monthly_sum, on='year_month', suffixes=('_mean', '_sum'))
+        monthly_aggregated = monthly_mean.merge(monthly_sum, on='month', suffixes=('_mean', '_sum'))
         
         # Return the JSON response
         return jsonify(monthly_aggregated.to_dict(orient='records'))
