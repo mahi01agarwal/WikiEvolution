@@ -6,7 +6,6 @@ import moment from 'moment';
 const SelectedArticles = ({ selectedRows }) => {
     const [articleData, setArticleData] = useState([]);
     const [pageViewsData, setPageViewsData] = useState([]);
-    const [selectedMetric, setSelectedMetric] = useState('pred_qual');
 
     useEffect(() => {
         // Fetch data for all selected articles when selectedRows change
@@ -138,6 +137,16 @@ const SelectedArticles = ({ selectedRows }) => {
         link.click();
     };
 
+    const metrics = [
+        { key: 'pred_qual', label: 'Predicted Quality' },
+        { key: 'num_refs', label: 'Number of References' },
+        { key: 'num_media', label: 'Number of Media' },
+        { key: 'num_wikilinks', label: 'Number of Wikilinks' },
+        { key: 'num_categories', label: 'Number of Categories' },
+        { key: 'num_headings', label: 'Number of Headings' },
+        { key: 'page_length', label: 'Page Length' },
+    ];
+
     return (
         <div className="selected-articles">
             {selectedRows.length > 0 && (
@@ -148,47 +157,45 @@ const SelectedArticles = ({ selectedRows }) => {
                     <button onClick={downloadTitles} className="btn btn-secondary">
                         Download Titles
                     </button>
-                    <select value={selectedMetric} onChange={(e) => setSelectedMetric(e.target.value)}>
-                        <option value="pred_qual">Predicted Quality</option>
-                        <option value="num_refs">Number of References</option>
-                        <option value="num_media">Number of Media</option>
-                        <option value="num_wikilinks">Number of Wikilinks</option>
-                        <option value="num_categories">Number of Categories</option>
-                        <option value="num_headings">Number of Headings</option>
-                        <option value="page_length">Page Length</option>
-                    </select>
+
                     <div className="plot-container">
                         {articleData.length > 0 && (
-                            <>
-                                <Plot
-                                    data={[{
-                                        x: articleData.map(d => d.year_month),
-                                        y: articleData.map(d => d[selectedMetric]),
-                                        type: 'scatter',
-                                        mode: 'lines',
-                                        name: selectedMetric.replace('_', ' ').toUpperCase()
-                                    }]}
-                                    layout={{
-                                        title: `${selectedMetric.replace('_', ' ').toUpperCase()} over Time`,
-                                        xaxis: {
-                                            rangeselector: {
-                                                buttons: [
-                                                    { count: 6, label: '6M', step: 'month', stepmode: 'backward' },
-                                                    { count: 1, label: '1Y', step: 'year', stepmode: 'backward' },
-                                                    { count: 5, label: '5Y', step: 'year', stepmode: 'backward' },
-                                                    { step: 'all' }
-                                                ]
+                            metrics.map(metric => (
+                                <div key={metric.key} className="plot-item">
+                                    <Plot
+                                        data={[{
+                                            x: articleData.map(d => d.year_month),
+                                            y: articleData.map(d => d[metric.key]),
+                                            type: 'scatter',
+                                            mode: 'lines',
+                                            name: metric.label
+                                        }]}
+                                        layout={{
+                                            title: `${metric.label} over Time`,
+                                            xaxis: {
+                                                rangeselector: {
+                                                    buttons: [
+                                                        { count: 6, label: '6M', step: 'month', stepmode: 'backward' },
+                                                        { count: 1, label: '1Y', step: 'year', stepmode: 'backward' },
+                                                        { count: 5, label: '5Y', step: 'year', stepmode: 'backward' },
+                                                        { step: 'all' }
+                                                    ]
+                                                },
+                                                rangeslider: { visible: true },
+                                                type: 'date'
                                             },
-                                            rangeslider: { visible: true },
-                                            type: 'date'
-                                        },
-                                        yaxis: { title: selectedMetric.replace('_', ' ').toUpperCase() },
-                                        template: 'plotly_white'
-                                    }}
-                                    config={{ displayModeBar: false }}
-                                    useResizeHandler={true}
-                                    style={{ width: "100%", height: "100%" }}
-                                />
+                                            yaxis: { title: metric.label },
+                                            template: 'plotly_white'
+                                        }}
+                                        config={{ displayModeBar: false }}
+                                        useResizeHandler={true}
+                                        style={{ width: "100%", height: "400px" }}
+                                    />
+                                </div>
+                            ))
+                        )}
+                        {pageViewsData.length > 0 && (
+                            <div className="plot-item">
                                 <Plot
                                     data={[{
                                         x: pageViewsData.map(d => d.month),
@@ -216,9 +223,9 @@ const SelectedArticles = ({ selectedRows }) => {
                                     }}
                                     config={{ displayModeBar: false }}
                                     useResizeHandler={true}
-                                    style={{ width: "100%", height: "100%" }}
+                                    style={{ width: "100%", height: "400px" }}
                                 />
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>

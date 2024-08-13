@@ -442,3 +442,40 @@ a {
 .article-selector {
   margin-top: 20px;
 }
+
+
+/* Add any additional styles needed for the tab system */
+.react-tabs__tab-list {
+  margin: 20px 0;
+  border-bottom: 2px solid #ddd;
+}
+
+.react-tabs__tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  background-color: #f5f5f5;
+  margin-right: 5px;
+}
+
+.react-tabs__tab--selected {
+  background-color: white;
+  border-bottom: 2px solid white;
+}
+
+.react-tabs__tab-panel {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-top: none;
+  background-color: white;
+}
+.plot-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Adds space between the plots */
+}
+
+.plot-item {
+  width: 100%;
+}

@@ -5,16 +5,25 @@ import FilterTable from './components/FilterData/FilterTable';
 import QualityImportanceStackedBarChart from './components/SimpleBarCharts/QualityImportanceStackedBarChart';
 import ImportanceQualityStackedBarChart from './components/SimpleBarCharts/ImportanceQualityStackedBarChart';
 import Graph from './components/AverageOfFeatures/Graph';
-import Dropdown from './components/AverageOfFeatures/Dropdown';
 import WikiProjectDropdown from './components/WikiProjectDropdown';
 import './App.css';
 import axios from 'axios';
-import FeatureCorrelationHeatmap from './components/FeatureCorrelationHeatmap';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
 
 const App = () => {
   const [selectedProject, setSelectedProject] = useState('');
   const [data, setData] = useState([]);
-  const [selectedMetric, setSelectedMetric] = useState('pred_qual');
+
+  const metrics = [
+    'pred_qual',
+    'num_refs',
+    'num_media',
+    'num_categories',
+    'num_wikilinks',
+    'num_headings',
+    'page_length'
+  ];
 
   useEffect(() => {
     axios.get('http://127.0.0.1:5000/get_csv_data_monthly_aggregated')
@@ -28,10 +37,6 @@ const App = () => {
   const handleProjectSelect = (project) => {
     setSelectedProject(project);
     // Fetch and process data for the selected project
-  };
-
-  const handleMetricChange = (selectedOption) => {
-    setSelectedMetric(selectedOption.value);
   };
 
   return (
@@ -51,24 +56,34 @@ const App = () => {
             Wikipedia:WikiProject Caribbean
           </a>
         </div>
-        <div className="margin-top-3">
-          <FeatureCorrelationHeatmap />
-        </div>
-        <div className="margin-top-3">
-          <QualityImportanceStackedBarChart />
-        </div>
-        <div className="margin-top-3">
-          <ImportanceQualityStackedBarChart />
-        </div>
-        <div style={{ width: '100%' }}>
-          <Dropdown selectedMetric={selectedMetric} handleMetricChange={handleMetricChange} />
-        </div>
-        <div className="margin-top-3">
-          <Graph data={data} selectedMetric={selectedMetric} />
-        </div>
-        <div className="margin-top-3">
-          <FilterTable />
-        </div>
+
+        <Tabs className="margin-top-3">
+          <TabList>
+            <Tab>Wikiproject Overview</Tab>
+            <Tab>Drill Down</Tab>
+          </TabList>
+
+          <TabPanel>
+            <div className="margin-top-3">
+              <QualityImportanceStackedBarChart />
+            </div>
+            <div className="margin-top-3">
+              <ImportanceQualityStackedBarChart />
+            </div>
+            <div className="margin-top-3">
+              <Graph data={data} metrics={metrics} />
+            </div>
+          </TabPanel>
+
+          <TabPanel>
+            <div className="margin-top-3">
+              <FilterTable />
+            </div>
+            {/* <div className="margin-top-3">
+              <FeatureCorrelationHeatmap />
+            </div> */}
+          </TabPanel>
+        </Tabs>
       </section>
       <Footer />
     </div>
