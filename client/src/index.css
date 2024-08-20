@@ -479,3 +479,59 @@ a {
 .plot-item {
   width: 100%;
 }
+
+/* Container for the scrollable table */
+.scrollable-table-container {
+  position: relative;
+  overflow-x: scroll; /* Always show horizontal scrollbar */
+  overflow-y: hidden; /* Ensure vertical scroll is not affected */
+}
+
+/* Shadow effect at the right edge to indicate scrollability */
+.scrollable-table-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0));
+  pointer-events: none;
+  opacity: 1;
+}
+
+/* Styling the scrollbar for better visibility */
+.scrollable-table-container::-webkit-scrollbar {
+  height: 12px; /* Increased height for visibility */
+}
+
+.scrollable-table-container::-webkit-scrollbar-thumb {
+  background: #888; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+.scrollable-table-container::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darker color when hovered */
+}
+
+/* Scroll indicator icon (if you decide to use it) */
+.scroll-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 5px;
+  z-index: 1;
+  opacity: 0.5;
+  pointer-events: none;
+  font-size: 20px; /* Adjust the size of the icon */
+}
+
+/* Hint message to indicate scrollability */
+.scroll-hint {
+  position: absolute;
+  bottom: 5px;
+  right: 20px;
+  font-size: 12px;
+  color: #888;
+  pointer-events: none;
+}

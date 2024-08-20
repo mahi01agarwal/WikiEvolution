@@ -30,8 +30,8 @@ const SelectedArticles = ({ selectedRows }) => {
 
                 // Fetch page views data for the aggregated article data
                 const titles = articles.map(article => article.page_title);
-                const start = aggregatedArticleData[0]?.year_month.replace('-', '') + '01';
-                const end = aggregatedArticleData[aggregatedArticleData.length - 1]?.year_month.replace('-', '') + '01';
+                const start = aggregatedArticleData[0]?.month.replace('-', '') + '01';
+                const end = aggregatedArticleData[aggregatedArticleData.length - 1]?.month.replace('-', '') + '01';
                 if (start && end) {
                     fetchPageViewsData(titles, start, end);
                 }
@@ -61,9 +61,9 @@ const SelectedArticles = ({ selectedRows }) => {
         const aggregatedData = {};
         allArticleData.forEach(articleData => {
             articleData.forEach(dataPoint => {
-                if (!aggregatedData[dataPoint.year_month]) {
-                    aggregatedData[dataPoint.year_month] = {
-                        year_month: dataPoint.year_month,
+                if (!aggregatedData[dataPoint.month]) {
+                    aggregatedData[dataPoint.month] = {
+                        month: dataPoint.month,
                         pred_qual: 0,
                         num_refs: 0,
                         num_media: 0,
@@ -71,21 +71,38 @@ const SelectedArticles = ({ selectedRows }) => {
                         num_categories: 0,
                         num_headings: 0,
                         page_length: 0,
+                        pred_qual_sum: 0,
+                        num_refs_sum: 0,
+                        num_media_sum: 0,
+                        num_wikilinks_sum: 0,
+                        num_categories_sum: 0,
+                        num_headings_sum: 0,
+                        page_length_sum: 0,
                         count: 0
                     };
                 }
-                aggregatedData[dataPoint.year_month].pred_qual += dataPoint.pred_qual;
-                aggregatedData[dataPoint.year_month].num_refs += dataPoint.num_refs;
-                aggregatedData[dataPoint.year_month].num_media += dataPoint.num_media;
-                aggregatedData[dataPoint.year_month].num_wikilinks += dataPoint.num_wikilinks;
-                aggregatedData[dataPoint.year_month].num_categories += dataPoint.num_categories;
-                aggregatedData[dataPoint.year_month].num_headings += dataPoint.num_headings;
-                aggregatedData[dataPoint.year_month].page_length += dataPoint.page_length;
-                aggregatedData[dataPoint.year_month].count += 1;
+                aggregatedData[dataPoint.month].pred_qual += dataPoint.pred_qual;
+                aggregatedData[dataPoint.month].num_refs += dataPoint.num_refs;
+                aggregatedData[dataPoint.month].num_media += dataPoint.num_media;
+                aggregatedData[dataPoint.month].num_wikilinks += dataPoint.num_wikilinks;
+                aggregatedData[dataPoint.month].num_categories += dataPoint.num_categories;
+                aggregatedData[dataPoint.month].num_headings += dataPoint.num_headings;
+                aggregatedData[dataPoint.month].page_length += dataPoint.page_length;
+
+                // Sum
+                aggregatedData[dataPoint.month].pred_qual_sum += dataPoint.pred_qual;
+                aggregatedData[dataPoint.month].num_refs_sum += dataPoint.num_refs;
+                aggregatedData[dataPoint.month].num_media_sum += dataPoint.num_media;
+                aggregatedData[dataPoint.month].num_wikilinks_sum += dataPoint.num_wikilinks;
+                aggregatedData[dataPoint.month].num_categories_sum += dataPoint.num_categories;
+                aggregatedData[dataPoint.month].num_headings_sum += dataPoint.num_headings;
+                aggregatedData[dataPoint.month].page_length_sum += dataPoint.page_length;
+
+                aggregatedData[dataPoint.month].count += 1;
             });
         });
         return Object.values(aggregatedData).map(data => ({
-            year_month: data.year_month,
+            month: data.month,
             pred_qual: data.pred_qual / data.count,
             num_refs: data.num_refs / data.count,
             num_media: data.num_media / data.count,
@@ -93,6 +110,13 @@ const SelectedArticles = ({ selectedRows }) => {
             num_categories: data.num_categories / data.count,
             num_headings: data.num_headings / data.count,
             page_length: data.page_length / data.count,
+            pred_qual_sum: data.pred_qual_sum,
+            num_refs_sum: data.num_refs_sum,
+            num_media_sum: data.num_media_sum,
+            num_wikilinks_sum: data.num_wikilinks_sum,
+            num_categories_sum: data.num_categories_sum,
+            num_headings_sum: data.num_headings_sum,
+            page_length_sum: data.page_length_sum,
         }));
     };
 
@@ -163,13 +187,24 @@ const SelectedArticles = ({ selectedRows }) => {
                             metrics.map(metric => (
                                 <div key={metric.key} className="plot-item">
                                     <Plot
-                                        data={[{
-                                            x: articleData.map(d => d.year_month),
-                                            y: articleData.map(d => d[metric.key]),
-                                            type: 'scatter',
-                                            mode: 'lines',
-                                            name: metric.label
-                                        }]}
+                                        data={[
+                                            {
+                                                x: articleData.map(d => d.month),
+                                                y: articleData.map(d => d[metric.key]),
+                                                type: 'scatter',
+                                                mode: 'lines',
+                                                name: `Mean ${metric.label}`,
+                                                yaxis: 'y1'
+                                            },
+                                            {
+                                                x: articleData.map(d => d.month),
+                                                y: articleData.map(d => d[`${metric.key}_sum`]),
+                                                type: 'scatter',
+                                                mode: 'lines',
+                                                name: `Sum ${metric.label}`,
+                                                yaxis: 'y2'
+                                            }
+                                        ]}
                                         layout={{
                                             title: `${metric.label} over Time`,
                                             xaxis: {
@@ -184,12 +219,27 @@ const SelectedArticles = ({ selectedRows }) => {
                                                 rangeslider: { visible: true },
                                                 type: 'date'
                                             },
-                                            yaxis: { title: metric.label },
-                                            template: 'plotly_white'
+                                            yaxis: { title: `Mean ${metric.label}`, side: 'left', showgrid: false },
+                                            yaxis2: {
+                                                title: `Sum ${metric.label}`,
+                                                overlaying: 'y',
+                                                side: 'right',
+                                                showgrid: false,
+                                            },
+                                            template: 'plotly_white',
+                                            showlegend: false,
+                                            hovermode: 'x unified'
                                         }}
                                         config={{ displayModeBar: false }}
                                         useResizeHandler={true}
                                         style={{ width: "100%", height: "400px" }}
+                                        hoverlabel={{
+                                            bgcolor: "white",
+                                            font: { size: 12 }
+                                        }}
+                                        hoverinfo="none"
+                                        hovertemplate={`Month: %{x}<br>Mean: %{y}<br>Sum: %{customdata}`}
+                                        customdata={articleData.map(d => d[`${metric.key}_sum`])}
                                     />
                                 </div>
                             ))
@@ -197,13 +247,16 @@ const SelectedArticles = ({ selectedRows }) => {
                         {pageViewsData.length > 0 && (
                             <div className="plot-item">
                                 <Plot
-                                    data={[{
-                                        x: pageViewsData.map(d => d.month),
-                                        y: pageViewsData.map(d => d.views),
-                                        type: 'scatter',
-                                        mode: 'lines',
-                                        name: 'Page Views'
-                                    }]}
+                                    data={[
+                                        {
+                                            x: pageViewsData.map(d => d.month),
+                                            y: pageViewsData.map(d => d.views),
+                                            type: 'scatter',
+                                            mode: 'lines',
+                                            name: 'Page Views',
+                                            hovertemplate: `Month: %{x}<br>Page Views: %{y}<extra></extra>`
+                                        }
+                                    ]}
                                     layout={{
                                         title: `Page Views over Time`,
                                         xaxis: {
@@ -219,7 +272,8 @@ const SelectedArticles = ({ selectedRows }) => {
                                             type: 'date'
                                         },
                                         yaxis: { title: 'Page Views' },
-                                        template: 'plotly_white'
+                                        template: 'plotly_white',
+                                        showlegend: false
                                     }}
                                     config={{ displayModeBar: false }}
                                     useResizeHandler={true}

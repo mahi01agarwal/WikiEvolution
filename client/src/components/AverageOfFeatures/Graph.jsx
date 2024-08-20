@@ -4,22 +4,15 @@ import Plot from 'react-plotly.js';
 const Graph = ({ data, metrics }) => {
     if (data.length === 0) return <div>Loading...</div>;
 
-    // Iterate through all the metrics to create plots for each one
     const allGraphs = metrics.map((metric) => {
-        // Dynamically construct the keys for mean and sum
         const meanKey = `${metric}_mean`;
         const sumKey = `${metric}_sum`;
 
-        // Extract the data for plotting
         const meanData = data.map(d => d[meanKey]);
         const sumData = data.map(d => d[sumKey]);
         const xData = data.map(d => d.month);
 
-        // Debugging: Check if the data arrays are populated correctly
-        console.log(`Mean Data for ${metric}:`, meanData);
-        console.log(`Sum Data for ${metric}:`, sumData);
-        console.log('X Data:', xData);
-
+        // Plot both mean and sum with the same color and no legend
         const plotData = [
             {
                 x: xData,
@@ -27,7 +20,10 @@ const Graph = ({ data, metrics }) => {
                 type: 'scatter',
                 mode: 'lines',
                 name: `Mean ${metric.replace('_', ' ')}`,
-                yaxis: 'y1'
+                yaxis: 'y1',
+                showlegend: false, // Hide the legend
+                hovertemplate: `%{y}`,
+                // customdata: sumData // Pass sum data to use in hovertemplate
             },
             {
                 x: xData,
@@ -35,7 +31,10 @@ const Graph = ({ data, metrics }) => {
                 type: 'scatter',
                 mode: 'lines',
                 name: `Sum ${metric.replace('_', ' ')}`,
-                yaxis: 'y2'
+                yaxis: 'y2',
+                showlegend: false, // Hide the legend
+                hovertemplate: `%{y}`,
+                // customdata: meanData // Pass mean data to use in hovertemplate
             }
         ];
 
@@ -59,14 +58,18 @@ const Graph = ({ data, metrics }) => {
                         },
                         yaxis: {
                             title: `Mean ${metric.replace('_', ' ')}`,
-                            side: 'left'
+                            side: 'left',
+                            rangemode: 'tozero'
                         },
                         yaxis2: {
                             title: `Sum ${metric.replace('_', ' ')}`,
                             overlaying: 'y',
-                            side: 'right'
+                            side: 'right',
+                            rangemode: 'tozero'
                         },
-                        template: 'plotly_white'
+                        template: 'plotly_white',
+                        showlegend: false,
+                        hovermode: 'x unified' // Ensure both traces' hover labels appear together
                     }}
                     config={{ displayModeBar: false }}
                     useResizeHandler={true}

@@ -418,7 +418,26 @@ const FilterTable = () => {
                     </div>
                     <button type="button" className="btn btn-primary" onClick={filterData}>Filter</button>
                 </form>
-                <div className="margin-top-3">
+                {/* <div className="margin-top-3 scrollable-table-container">
+                    <DataTable
+                        columns={columns}
+                        data={tableData}
+                        selectableRows
+                        onSelectedRowsChange={handleSelectedRowsChange}
+                        pagination
+                        highlightOnHover
+                        pointerOnHover
+                        selectableRowsComponentProps={{ inkdisabled: "true" }}
+                    />
+                </div> */}
+
+                <div className="margin-top-3 scrollable-table-container">
+                    <div className="scroll-hint">
+                        <span>Scroll for more columns</span>
+                    </div>
+                    <div className="scroll-indicator">
+                        <i className="fa fa-arrow-right"></i>
+                    </div>
                     <DataTable
                         columns={columns}
                         data={tableData}
@@ -430,6 +449,8 @@ const FilterTable = () => {
                         selectableRowsComponentProps={{ inkdisabled: "true" }}
                     />
                 </div>
+
+
                 <SelectedArticles selectedRows={selectedRows} key={tableData.length} />
             </section>
         </div>
