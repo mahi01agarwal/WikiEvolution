@@ -271,7 +271,7 @@ const SelectedArticles = ({ selectedRows }) => {
                                             rangeslider: { visible: true },
                                             type: 'date'
                                         },
-                                        yaxis: { title: 'Page Views' },
+                                        yaxis: { title: 'Mean Page Views' },
                                         template: 'plotly_white',
                                         showlegend: false
                                     }}
