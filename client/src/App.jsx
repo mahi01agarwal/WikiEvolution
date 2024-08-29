@@ -70,10 +70,10 @@ const App = () => {
               <TabPanel>
                 <div className="margin-top-3">
                   <QualityImportanceStackedBarChart />
-                </div>
+                </div> 
                 <div className="margin-top-3">
                   <ImportanceQualityStackedBarChart />
-                </div>
+                </div> 
                 <div className="margin-top-3">
                   <Graph data={data} metrics={metrics} />
                 </div>
