@@ -1,21 +1,26 @@
 import pandas as pd
-import os
 import requests
-from io import BytesIO
-from zipfile import ZipFile
+from io import StringIO
 
-# Function to construct the URL based on the user's input
+# Function to construct the URL based on the Wikiproject name
 def construct_url(base_url, wikiproject_name):
     file_name = f"{wikiproject_name}.csv"
     return f"{base_url}{file_name}"
 
-# Function to download the CSV file
+# Function to download the CSV file using requests and StringIO
 def download_csv(url):
     try:
-        # Disable SSL verification
-        response = requests.get(url, verify=False)
-        response.raise_for_status()  # Raise an error for bad status
-        return pd.read_csv(BytesIO(response.content))
+        # Make a GET request to fetch the raw CSV data
+        response = requests.get(url, verify=False)  # Disable SSL verification
+        response.raise_for_status()  # Raise an error for bad status codes
+
+        # Use StringIO to convert the response text to a file-like object
+        csv_data = StringIO(response.text)
+        
+        # Read the CSV data into a DataFrame
+        df = pd.read_csv(csv_data)
+        
+        return df
     except Exception as e:
         print(f"Error downloading the file from {url}: {e}")
         return None
@@ -53,12 +58,12 @@ def fill_missing_months(df):
     return df_filled
 
 # Main function to execute the script
-def main():
+def main(selected_wikiproject):
     # Base URL for the revisions data
     base_url = "https://analytics.wikimedia.org/published/datasets/outreachy-round-28/revisions/"
     
-    # Prompt the user for the Wikiproject name
-    wikiproject_name = input("Enter the Wikiproject name: ")
+    # Use the provided Wikiproject name
+    wikiproject_name = selected_wikiproject
     
     # Remove the ".csv" extension from the input if provided
     if wikiproject_name.endswith(".csv"):
@@ -83,6 +88,3 @@ def main():
     output_file_name = f"{wikiproject_name}_latest_monthly.csv"
     df_processed.to_csv(output_file_name, index=False)
     print(f"Processed data saved to {output_file_name}")
-
-if __name__ == "__main__":
-    main()

@@ -48,57 +48,53 @@ def transform_data(df_revisions, df_pages, wikiproject_name):
     return transformed_df
 
 # Main function to execute the script
-def main():
+def main(selected_wikiproject):
     # Base URLs
     revisions_base_url = "https://analytics.wikimedia.org/published/datasets/outreachy-round-28/revisions/"
     assessments_base_url = "https://analytics.wikimedia.org/published/datasets/outreachy-round-28/assessments/"
     
-    while True:
-        # Prompt the user for the Wikiproject name
-        wikiproject_name = input("Enter the Wikiproject name (or type 'exit' to finish): ")
-        
-        if wikiproject_name.lower() == 'exit':
-            break
-        
-        # Remove the ".csv" extension from the input if provided
-        if wikiproject_name.endswith(".csv"):
-            wikiproject_name = wikiproject_name[:-4]
-        
-        # Construct the URLs and local file names
-        revisions_url = construct_url(revisions_base_url, wikiproject_name)
-        assessments_url = construct_url(assessments_base_url, wikiproject_name)
-        revisions_file_name = f"{wikiproject_name}_revisions.csv"
-        assessments_file_name = f"{wikiproject_name}_assessments.csv"
-        
-        # Download the CSV files
-        if not download_csv(revisions_url, revisions_file_name):
-            continue
-        if not download_csv(assessments_url, assessments_file_name):
-            continue
-        
-        # Read the CSV files
-        try:
-            df_revisions = pd.read_csv(revisions_file_name)
-            df_pages = pd.read_csv(assessments_file_name)
-        except Exception as e:
-            print(f"Error reading the CSV files: {e}")
-            continue
-        
-        # Perform the data transformations
-        transformed_df = transform_data(df_revisions, df_pages, wikiproject_name)
-        
-        # Save the transformed data to a CSV file
-        merged_file_name = f"{wikiproject_name}_merged.csv"
-        transformed_df.to_csv(merged_file_name, index=False)
-        print(f"Saved merged data to {merged_file_name}")
-        
-        # Delete the downloaded CSV files
-        try:
-            os.remove(revisions_file_name)
-            os.remove(assessments_file_name)
-            print(f"Deleted {revisions_file_name} and {assessments_file_name}")
-        except Exception as e:
-            print(f"Error deleting the files: {e}")
+    # Use the provided Wikiproject name
+    wikiproject_name = selected_wikiproject
+    
+    # Remove the ".csv" extension from the input if provided
+    if wikiproject_name.endswith(".csv"):
+        wikiproject_name = wikiproject_name[:-4]
+    
+    # Construct the URLs and local file names
+    revisions_url = construct_url(revisions_base_url, wikiproject_name)
+    assessments_url = construct_url(assessments_base_url, wikiproject_name)
+    revisions_file_name = f"{wikiproject_name}_revisions.csv"
+    assessments_file_name = f"{wikiproject_name}_assessments.csv"
+    
+    # Download the CSV files
+    if not download_csv(revisions_url, revisions_file_name):
+        return
+    if not download_csv(assessments_url, assessments_file_name):
+        return
+    
+    # Read the CSV files
+    try:
+        df_revisions = pd.read_csv(revisions_file_name)
+        df_pages = pd.read_csv(assessments_file_name)
+    except Exception as e:
+        print(f"Error reading the CSV files: {e}")
+        return
+    
+    # Perform the data transformations
+    transformed_df = transform_data(df_revisions, df_pages, wikiproject_name)
+    
+    # Save the transformed data to a CSV file
+    merged_file_name = f"{wikiproject_name}_merged.csv"
+    transformed_df.to_csv(merged_file_name, index=False)
+    print(f"Saved merged data to {merged_file_name}")
+    
+    # Delete the downloaded CSV files
+    try:
+        os.remove(revisions_file_name)
+        os.remove(assessments_file_name)
+        print(f"Deleted {revisions_file_name} and {assessments_file_name}")
+    except Exception as e:
+        print(f"Error deleting the files: {e}")
 
 if __name__ == "__main__":
     main()

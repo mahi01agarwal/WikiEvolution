@@ -25,65 +25,71 @@ const App = () => {
     'page_length'
   ];
 
-  useEffect(() => {
-    axios.get('http://127.0.0.1:5000/get_csv_data_monthly_aggregated')
+  const handleProjectSelect = (project) => {
+    setSelectedProject(project);
+    // Fetch data after selecting a project
+    fetchData(project);
+  };
+
+  const fetchData = (project) => {
+    // Fetch data for the selected project
+    axios.get(`http://127.0.0.1:5000/get_csv_data_monthly_aggregated?project=${project}`)
       .then(response => {
         console.log('Fetched data:', response.data);
         setData(response.data);
       })
       .catch(error => console.error('Error fetching data:', error));
-  }, []);
-
-  const handleProjectSelect = (project) => {
-    setSelectedProject(project);
-    // Fetch and process data for the selected project
   };
 
   return (
     <div className="main-container">
       <Header />
-      <section >
+      <section>
         <div className='margin-top-3'>
           <WikiProjectDropdown onSelectProject={handleProjectSelect} />
         </div>
-        <div className="section-text margin-top-3">
-          <a
-            href="https://en.wikipedia.org/w/index.php?title=Wikipedia:WikiProject_Caribbean&oldid=1222553608"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="title-link"
-          >
-            Wikipedia:WikiProject Caribbean
-          </a>
-        </div>
+        {selectedProject && (
+          <>
+            <div className="section-text margin-top-3">
+              <a
+                href={`https://en.wikipedia.org/w/index.php?title=Wikipedia:WikiProject_${selectedProject}&oldid=1222553608`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="title-link"
+              >
+                {`Wikipedia:WikiProject ${selectedProject}`}
+              </a>
+            </div>
 
-        <Tabs className="margin-top-3">
-          <TabList>
-            <Tab>Wikiproject Overview</Tab>
-            <Tab>Drill Down</Tab>
-          </TabList>
+            <Tabs className="margin-top-3">
+              <TabList>
+                <Tab>Wikiproject Overview</Tab>
+                <Tab>Drill Down</Tab>
+              </TabList>
 
-          <TabPanel>
-            <div className="margin-top-3">
-              <QualityImportanceStackedBarChart />
-            </div>
-            <div className="margin-top-3">
-              <ImportanceQualityStackedBarChart />
-            </div>
-            <div className="margin-top-3">
-              <Graph data={data} metrics={metrics} />
-            </div>
-          </TabPanel>
+              <TabPanel>
+                <div className="margin-top-3">
+                  <QualityImportanceStackedBarChart />
+                </div>
+                <div className="margin-top-3">
+                  <ImportanceQualityStackedBarChart />
+                </div>
+                <div className="margin-top-3">
+                  <Graph data={data} metrics={metrics} />
+                </div>
+              </TabPanel>
 
-          <TabPanel>
-            <div className="margin-top-3">
-              <FilterTable />
-            </div>
-            {/* <div className="margin-top-3">
-              <FeatureCorrelationHeatmap />
-            </div> */}
-          </TabPanel>
-        </Tabs>
+              <TabPanel>
+                <div className="margin-top-3">
+                  <FilterTable />
+                </div>
+                {/* <div className="margin-top-3">
+                  <FeatureCorrelationHeatmap />
+                </div> */}
+              </TabPanel>
+            </Tabs>
+          </>
+        )}
       </section>
       <Footer />
     </div>

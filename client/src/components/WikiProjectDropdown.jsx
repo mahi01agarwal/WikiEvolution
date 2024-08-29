@@ -16,14 +16,16 @@ const WikiProjectDropdown = ({ onSelectProject }) => {
   }, []);
 
   const handleProjectSelect = (option) => {
-    axios.post('http://127.0.0.1:5000/process_wikiproject', { project_name: option.value })
+    axios.post('http://127.0.0.1:5000/set_selected_wikiproject', { project_name: option.value })
       .then(response => {
-        console.log('WikiProject processed successfully:', response.data);
+        console.log('WikiProject selected successfully:', response.data);
+        onSelectProject(option.value); // You may still want to do something with the selected project.
       })
       .catch(error => {
-        console.error('Error processing WikiProject:', error);
+        console.error('Error selecting WikiProject:', error);
       });
-  };
+};
+
 
 
   return (
