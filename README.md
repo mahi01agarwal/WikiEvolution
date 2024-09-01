@@ -18,7 +18,7 @@ Make sure you have the following installed on your system:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/mahi01agarwal/WikiEvolution.git
+   git clone https://gitlab.wikimedia.org/repos/research/WikiEvolution.git
    cd WikiEvolution
    ```
 
@@ -62,3 +62,4 @@ Make sure you have the following installed on your system:
 
 For now, the application may not display data as expected since the dataset required for the project has not been uploaded to the repository. The application will function as intended after the data is deployed.
 
+**Important:** The original GitHub repository has been archived, and all future development will take place in the new GitLab repository linked above.
